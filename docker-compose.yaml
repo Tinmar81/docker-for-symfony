@@ -1,0 +1,38 @@
+version: '2'
+services:
+  mysql:
+    image: mysql
+    restart: always
+    ports:
+      - "8000:3306"
+    volumes:
+      - data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "tinmar_pk_dev"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "root"
+    container_name: mysql_pk
+  php:
+    build: php-fpm
+    ports:
+      - '9002:9000'
+    volumes:
+      - ../:/var/www/symfony:cached
+      - ./logs/symfony:/var/www/symfony/var/logs:cached
+    links:
+      - mysql:5.7
+    container_name: php_pk
+  nginx:
+    build: nginx
+    ports:
+      - '8080:80'
+    links:
+      - php
+    volumes_from:
+      - php
+    volumes:
+      - ./logs/nginx/:/var/log/nginx:cached
+    container_name: nginx_pk
+volumes:
+  data:
